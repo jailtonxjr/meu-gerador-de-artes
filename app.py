@@ -30,8 +30,8 @@ st.title("🎨 Gerador de Artes Automático")
 st.sidebar.header("Configurações")
 
 # Campos para preencher
-nome = st.text_input("Nome completo", "Fulano de Tal")
-cargo = st.text_input("Cargo", "Desenvolvedor")
+nome = st.text_input("Nome completo", "Nome e Sobrenome")
+cargo = st.text_input("Cargo", "Secretário(a) de ...")
 foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
 
 if foto_upload:
@@ -81,3 +81,4 @@ if foto_upload:
     arte.save(img_byte_arr, format='PNG')
 
     st.download_button(label="📥 Baixar Arte", data=img_byte_arr.getvalue(), file_name=f"arte_{nome}.png", mime="image/png")
+
