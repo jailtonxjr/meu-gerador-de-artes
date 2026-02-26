@@ -69,7 +69,7 @@ if foto_upload:
         
         # Centralizar Cargo
         w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
-        draw.text((CENTRO_X - w_c/2, 1200), cargo.upper(), font=f_cargo, fill="white")
+        draw.text((CENTRO_X - w_c/2, 1205), cargo.upper(), font=f_cargo, fill="white")
     except:
         st.error("Erro ao carregar as fontes. Verifique se os arquivos .ttf estão na pasta.")
 
@@ -79,4 +79,5 @@ if foto_upload:
     # Botão de Download
     img_byte_arr = io.BytesIO()
     arte.save(img_byte_arr, format='PNG')
+
     st.download_button(label="📥 Baixar Arte", data=img_byte_arr.getvalue(), file_name=f"arte_{nome}.png", mime="image/png")
