@@ -56,7 +56,7 @@ st.markdown(f"""
 
     /* 5. BOTÃO GERAR CENTRALIZADO */
     .stButton {{
-        widht: 100%;
+        width: 100%;
         display: flex;
         justify-content: center;
         width: 100%;
@@ -155,4 +155,5 @@ if gerar_arte:
                 st.error(f"Erro: {e}")
     else:
         st.info("⚠️ Preencha todos os campos para gerar.")
+
 
