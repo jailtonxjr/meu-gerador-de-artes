@@ -116,21 +116,19 @@ if gerar_arte:
                 base = Image.open("template.png").convert("RGBA")
                 foto_img = Image.open(foto_upload).convert("RGBA")
                 
-                # 2. Corte Central (Center Crop) Automático
+               # 2. Corte Central (Center Crop) Quadrado
+                # Mantém a proporção e garante que a foto vire um quadrado de 995x995
                 tamanho_alvo = 995
-                foto_img = ImageOps.fit(foto_img, (tamanho_alvo, tamanho_alvo), Image.LANCZOS)
+                foto_final = ImageOps.fit(foto_img, (tamanho_alvo, tamanho_alvo), Image.LANCZOS)
                 
-                # 3. Criar Máscara Circular Perfeita
-                mask = Image.new('L', (tamanho_alvo, tamanho_alvo), 0)
-                draw_mask = ImageDraw.Draw(mask)
-                draw_mask.ellipse((0, 0, tamanho_alvo, tamanho_alvo), fill=255)
+                # 3. Rotação (Ajuste para alinhar com a moldura inclinada)
+                # Removendo a máscara, a foto agora rotaciona com os cantos retos (90°)
+                foto_final = foto_final.rotate(4, resample=Image.BICUBIC, expand=True) 
                 
-                # Aplica a máscara circular na foto
-                foto_redonda = Image.new("RGBA", (tamanho_alvo, tamanho_alvo), (0,0,0,0))
-                foto_redonda.paste(foto_img, (0, 0), mask)
-                
-                # 4. Rotação (Ajuste para 4 ou -4 dependendo do seu template)
-                foto_final = foto_redonda.rotate(4, resample=Image.BICUBIC, expand=True) 
+                # 4. Composição
+                canvas = Image.new("RGBA", base.size, (0,0,0,0))
+                # Aqui a foto entra no seu template sem o corte redondo
+                canvas.paste(foto_final, (35, 275), foto_final)
                 
                 # 5. Composição no Template
                 canvas = Image.new("RGBA", base.size, (0,0,0,0))
@@ -173,3 +171,4 @@ if gerar_arte:
                 st.error(f"Erro no processamento: {e}")
     else:
         st.warning("⚠️ Preencha todos os campos e selecione uma foto antes de continuar.")
+
