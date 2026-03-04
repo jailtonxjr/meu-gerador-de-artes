@@ -39,7 +39,7 @@ st.markdown(f"""
         left: 50%;
         transform: translate(-50%, -50%);
         width: 100%;
-        max-width: 450px;
+        max-width: 650px;
         height: 650px; /* Ajuste a altura conforme necessário */
         background-color: white;
         border-radius: 35px;
@@ -150,4 +150,5 @@ if foto_upload and nome and cargo:
         
     except Exception as e:
         st.error(f"Erro: {e}")
+
 
