@@ -126,7 +126,7 @@ if gerar_arte:
                 
                 # Redimensionar e Girar (conforme parâmetros anteriores)
                 foto = foto.resize((995, 995), Image.LANCZOS)
-                foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
+                foto = foto.rotate(4, resample=Image.BICUBIC, expand=True)
                 
                 canvas = Image.new("RGBA", base.size, (0,0,0,0))
                 canvas.paste(foto, (35, 275), foto)
@@ -156,3 +156,4 @@ if gerar_arte:
                 
             except Exception as e:
                 st.error(f"Erro: {e}")
+
