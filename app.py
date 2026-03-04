@@ -123,7 +123,7 @@ if gerar_arte:
                 
                 # 3. Rotação (Ajuste para alinhar com a moldura inclinada)
                 # Removendo a máscara, a foto agora rotaciona com os cantos retos (90°)
-                foto_final = foto_final.rotate(4, resample=Image.BICUBIC, expand=True) 
+                foto_final = foto_final.rotate(2, resample=Image.BICUBIC, expand=True) 
                 
                 # 4. Composição
                 canvas = Image.new("RGBA", base.size, (0,0,0,0))
@@ -171,6 +171,7 @@ if gerar_arte:
                 st.error(f"Erro no processamento: {e}")
     else:
         st.warning("⚠️ Preencha todos os campos e selecione uma foto antes de continuar.")
+
 
 
 
