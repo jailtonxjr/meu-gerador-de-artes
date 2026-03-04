@@ -4,156 +4,145 @@ import io
 import base64
 
 # --- CONFIGURAÇÕES ---
-st.set_page_config(page_title="Gerador SECOM", layout="centered")
+st.set_page_config(page_title="Gerador SECOM - Pro", layout="centered")
 
-def carregar_imagem_local(caminho):
-    try:
-        with open(caminho, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except:
-        return ""
-
-bg_base64 = carregar_imagem_local("background.jpg")
-
-# --- INTERFACE HTML/CSS (O CARD UNIFICADO) ---
+# --- CSS ESTILO GEMINI (DARK MODE & GLASSMORPHISM) ---
 st.markdown(f"""
     <style>
-    /* 1. Fundo da Página */
+    /* 1. Fundo Geral (Cinza Escuro Profundo) */
     [data-testid="stAppViewContainer"] {{
-        background: url("data:image/png;base64,{bg_base64}");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
+        background-color: #131314; /* Cor oficial do fundo do Gemini */
+        background-image: radial-gradient(circle at top right, #1e1e20, #131314);
     }}
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
-    /* 2. Centralização do Container Principal do Streamlit */
-    [data-testid="stVerticalBlock"] {{
-        align-items: center !important;
-        gap: 0px !important;
-    }}
-
-    /* 3. O CARD BRANCO (MOLDURA) */
-    .figma-card {{
-        background-color: white;
+    /* 2. O Card Estilo Glassmorphism */
+    .gemini-card {{
+        background: rgba(30, 31, 32, 0.7); /* Cinza levemente transparente */
+        backdrop-filter: blur(10px); /* Efeito de vidro fosco */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
         padding: 40px 30px;
-        border-radius: 35px;
-        box-shadow: 0px 15px 45px rgba(0,0,0,0.3);
         width: 100%;
-        max-width: 450px; /* Largura fixa do card */
-        margin: 20px auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Centraliza tudo horizontalmente dentro do card */
-    }}
-
-    /* 4. Estilização dos Elementos Internos */
-    .emoji {{ font-size: 60px; margin-bottom: 10px; }}
-    .titulo {{ 
-        font-weight: bold; 
-        color: #222; 
+        max-width: 450px;
+        margin: 40px auto;
         text-align: center;
-        margin-bottom: 25px; 
-        font-size: 20px;
-        line-height: 1.2;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
     }}
 
-    /* Ajuste para que os Widgets ocupem a largura total do card */
-    .stTextInput, .stFileUploader, .stButton {{
-        width: 100% !important;
+    /* 3. Textos */
+    .emoji {{ font-size: 50px; margin-bottom: 10px; }}
+    .titulo {{ 
+        color: #e3e3e3; 
+        font-family: 'Google Sans', sans-serif;
+        font-size: 22px;
+        font-weight: 500;
+        margin-bottom: 30px;
     }}
 
-    /* Placeholder e Inputs */
-    ::placeholder {{ color: #888 !important; }}
+    /* 4. Customização dos Inputs (Estilo Dark) */
+    .stTextInput label, .stFileUploader label {{
+        color: #e3e3e3 !important;
+        font-weight: 400 !important;
+    }}
+
     .stTextInput input {{
-        background-color: #F0F2F5 !important;
-        border: none !important;
+        background-color: #1e1f20 !important;
+        border: 1px solid #444746 !important;
         border-radius: 12px !important;
+        color: white !important;
+        padding: 12px !important;
     }}
 
-    /* Botão Centralizado e Estilizado */
+    /* Botão com degradê estilo IA */
     .stButton > button {{
-        background-color: #00A3FF !important;
+        background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
         color: white !important;
-        border-radius: 15px !important;
         border: none !important;
+        border-radius: 50px !important;
+        padding: 10px 24px !important;
+        font-weight: 600 !important;
         width: 100% !important;
         height: 50px !important;
-        font-weight: bold !important;
-        margin-top: 10px;
+        margin-top: 20px;
+        transition: transform 0.2s;
     }}
     
-    /* Ajuste Mobile */
-    @media (max-width: 480px) {{
-        .figma-card {{ width: 90%; padding: 25px 20px; }}
+    .stButton > button:hover {{
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(66, 133, 244, 0.4);
+    }}
+
+    /* Drag and Drop Dark */
+    .stFileUploader section {{
+        background-color: #1e1f20 !important;
+        border: 1px dashed #444746 !important;
+        border-radius: 12px !important;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- CONSTRUÇÃO DO CONTEÚDO ---
+# --- ESTRUTURA DA INTERFACE ---
 
-# Abrimos o Card Branco
-st.markdown('<div class="figma-card">', unsafe_allow_html=True)
+st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
 
-# Emoji e Título (Centralizados pelo CSS .figma-card)
-st.markdown('<div class="emoji">🥳</div>', unsafe_allow_html=True)
-st.markdown('<div class="titulo">Gerador de Artes para os Aniversariantes Automático!</div>', unsafe_allow_html=True)
+st.markdown('<div class="emoji">✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="titulo">Gerador de Artes SECOM</div>', unsafe_allow_html=True)
 
-# Widgets (agora estão visualmente "dentro" do card)
-nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
-cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
-foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
+nome = st.text_input("Nome do Aniversariante", placeholder="Digite o nome completo...")
+cargo = st.text_input("Cargo ou Setor", placeholder="Ex: Coordenação de Comunicação")
+foto_upload = st.file_uploader("Escolha uma foto", type=["jpg", "png", "jpeg"])
 
-# Botão Criar Arte
-gerar_arte = st.button("🚀 CRIAR ARTE AGORA")
+gerar_arte = st.button("GERAR ARTE")
 
-st.markdown("<p style='color:#999; font-size:11px; margin-top:20px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
+st.markdown("<p style='color:#8e918f; font-size:12px; margin-top:25px;'>Inteligência e Design • SECOM 2024</p>", unsafe_allow_html=True)
 
-# Fechamos o Card Branco
 st.markdown('</div>', unsafe_allow_html=True)
 
-
-# --- MOTOR DE GERAÇÃO (FORA DO CARD) ---
+# --- MOTOR DE GERAÇÃO (Pillow) ---
 if gerar_arte:
-    if not foto_upload or not nome or not cargo:
-        st.error("Preencha todos os campos e suba uma foto!")
-    else:
-        with st.spinner('Gerando arte...'):
+    if foto_upload and nome and cargo:
+        with st.spinner('Processando arte...'):
             try:
+                # Carrega arquivos
                 base = Image.open("template.png").convert("RGBA")
                 foto = Image.open(foto_upload).convert("RGBA")
                 
-                # Redimensionar e Girar (conforme parâmetros anteriores)
+                # Ajuste da foto (Redimensionar e girar -4 graus)
                 foto = foto.resize((995, 995), Image.LANCZOS)
-                foto = foto.rotate(4, resample=Image.BICUBIC, expand=True)
+                foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
                 
-                canvas = Image.new("RGBA", base.size, (0,0,0,0))
-                canvas.paste(foto, (35, 275), foto)
-                final = Image.alpha_composite(canvas, base)
+                # Composição
+                final = Image.new("RGBA", base.size, (0,0,0,0))
+                final.paste(foto, (35, 275), foto)
+                final = Image.alpha_composite(final, base)
                 
-                # Desenhar Texto
+                # Texto
                 draw = ImageDraw.Draw(final)
                 try:
                     f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
                     f_cargo = ImageFont.truetype("Poppins-Regular.ttf", 34)
                     
+                    # Centralizar Nome
                     w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
                     draw.text(((1080 - w_n)/2, 1115), nome, fill="white", font=f_nome)
                     
+                    # Centralizar Cargo
                     w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
                     draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
                 except:
-                    pass
+                    st.warning("Usando fonte padrão do sistema.")
 
-                # Mostrar resultado abaixo do card
+                # Resultado
                 st.markdown("---")
-                st.image(final, caption="Sua arte pronta!", use_container_width=True)
+                st.image(final, caption="Sua arte personalizada", use_container_width=True)
                 
                 buf = io.BytesIO()
                 final.save(buf, format="PNG")
-                st.download_button("📥 Baixar Imagem", buf.getvalue(), f"arte_{nome}.png", "image/png")
+                st.download_button("📥 Baixar Arte Final", buf.getvalue(), f"niver_{nome}.png", "image/png")
                 
             except Exception as e:
-                st.error(f"Erro: {e}")
-
+                st.error(f"Ocorreu um erro: {e}")
+    else:
+        st.info("Preencha todos os campos para continuar.")
