@@ -132,7 +132,7 @@ if foto_upload and nome and cargo:
             
             # Centralização do texto
             w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
-            draw.text(((1080 - w_n)/2, 1115), nome, fill="white", font=f_nome)
+            draw.text(((1080 - w_n)/2, 1115), nome, fill="gray", font=f_nome)
             
             w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
             draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
@@ -150,6 +150,7 @@ if foto_upload and nome and cargo:
         
     except Exception as e:
         st.error(f"Erro: {e}")
+
 
 
 
