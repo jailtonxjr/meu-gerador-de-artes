@@ -107,61 +107,53 @@ gerar_arte = st.button("GERAR ARTE")
 
 st.markdown('<div class="footer-text">Desenvolvido por Júnior • SECOM 2026</div>', unsafe_allow_html=True)
 
-# --- MOTOR DE GERAÇÃO (CORTE REDONDO SEM DISTORÇÃO) ---
+# --- MOTOR DE GERAÇÃO (CORTE QUADRADO ESTILO POLAROID) ---
 if gerar_arte:
     if foto_upload and nome and cargo:
-        with st.spinner('Processando imagem...'):
+        with st.spinner('Construindo sua arte...'):
             try:
                 # 1. Carregar arquivos
                 base = Image.open("template.png").convert("RGBA")
                 foto_img = Image.open(foto_upload).convert("RGBA")
                 
-                # 2. Corte Central (Center Crop) Automático
+                # 2. Corte Central (Center Crop) Quadrado
+                # O ImageOps.fit garante que a foto vire um quadrado de 995x995 sem esticar
                 tamanho_alvo = 995
-                foto_img = ImageOps.fit(foto_img, (tamanho_alvo, tamanho_alvo), Image.LANCZOS)
+                foto_quadrada = ImageOps.fit(foto_img, (tamanho_alvo, tamanho_alvo), Image.LANCZOS)
                 
-                # 3. Criar Máscara Circular Perfeita
-                mask = Image.new('L', (tamanho_alvo, tamanho_alvo), 0)
-                draw_mask = ImageDraw.Draw(mask)
-                draw_mask.ellipse((0, 0, tamanho_alvo, tamanho_alvo), fill=255)
+                # 3. Rotação (Ajuste para 4 graus para alinhar com a moldura inclinada)
+                # Se a foto parecer torta para o lado errado, mude para -4
+                foto_final = foto_quadrada.rotate(4, resample=Image.BICUBIC, expand=True) 
                 
-                # Aplica a máscara circular na foto
-                foto_redonda = Image.new("RGBA", (tamanho_alvo, tamanho_alvo), (0,0,0,0))
-                foto_redonda.paste(foto_img, (0, 0), mask)
-                
-                # 4. Rotação (Ajuste para 4 ou -4 dependendo do seu template)
-                foto_final = foto_redonda.rotate(4, resample=Image.BICUBIC, expand=True) 
-                
-                # 5. Composição no Template
+                # 4. Composição no Template
                 canvas = Image.new("RGBA", base.size, (0,0,0,0))
-                # Coordenadas X, Y para encaixar no buraco do template
+                # (35, 275) são as coordenadas onde a foto entra na moldura branca
                 canvas.paste(foto_final, (35, 275), foto_final) 
                 arte_final = Image.alpha_composite(canvas, base)
                 
-                # 6. Escrever Textos Centralizados
+                # 5. Escrever Textos
                 draw = ImageDraw.Draw(arte_final)
                 try:
+                    # Carregando as fontes (certifique-se que os arquivos .ttf estão na pasta)
                     f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
                     f_cargo = ImageFont.truetype("Poppins-Regular.ttf", 34)
                     
-                    # Nome
+                    # Centralizar Nome
                     w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
                     draw.text(((1080 - w_n)/2, 1115), nome, fill="white", font=f_nome)
                     
-                    # Cargo
+                    # Centralizar Cargo
                     w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
                     draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
                 except:
-                    st.warning("Fontes Poppins não encontradas. Verifique se os arquivos .ttf estão na pasta.")
+                    st.warning("Fontes não encontradas. Usando padrão.")
 
-                # 7. Exibição da Prévia e Download
+                # 6. Exibição e Download
                 st.markdown("---")
-                st.image(arte_final, caption="Sua arte foi gerada!", use_container_width=True)
+                st.image(arte_final, use_container_width=True)
                 
                 buf = io.BytesIO()
                 arte_final.save(buf, format="PNG")
-                
-                # Botão de download também centralizado pelo CSS acima
                 st.download_button(
                     label="📥 Baixar Arte Final",
                     data=buf.getvalue(),
@@ -170,6 +162,4 @@ if gerar_arte:
                 )
                 
             except Exception as e:
-                st.error(f"Erro no processamento: {e}")
-    else:
-        st.warning("⚠️ Preencha todos os campos e selecione uma foto antes de continuar.")
+                st.error(f"Erro: {e}")
