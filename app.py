@@ -116,6 +116,139 @@ st.markdown('<div class="footer-text">Desenvolvido por Júnior - SECOM</div>', u
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+import streamlit as st
+from PIL import Image, ImageDraw, ImageFont
+import io
+
+# --- CONFIGURAÇÕES ---
+st.set_page_config(page_title="Gerador SECOM - Pro", layout="centered")
+
+# --- CSS ESTILO GEMINI (CENTRALIZAÇÃO TOTAL) ---
+st.markdown(f"""
+    <style>
+    /* 1. Fundo Geral */
+    [data-testid="stAppViewContainer"] {{
+        background-color: #131314;
+        background-image: radial-gradient(circle at top right, #1e1e20, #131314);
+    }}
+    
+    [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
+
+    /* 2. CARD CENTRALIZADO (O segredo está aqui) */
+    .gemini-card {{
+        background: rgba(30, 31, 32, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px;
+        padding: 40px 30px;
+        width: 100%;
+        max-width: 450px;
+        margin: auto;
+        display: flex; /* Habilita o Flexbox */
+        flex-direction: column; /* Empilha os itens */
+        align-items: center; /* Centraliza horizontalmente */
+        justify-content: center;
+    }}
+
+    /* 3. Textos (Emoji e Título) */
+    .emoji {{ 
+        font-size: 60px; 
+        margin-bottom: 5px; 
+        text-align: center;
+        display: block;
+        width: 100%;
+    }}
+    .titulo {{ 
+        color: #e3e3e3; 
+        font-family: 'Google Sans', sans-serif;
+        font-size: 24px;
+        font-weight: 500;
+        margin-bottom: 30px;
+        width: 100%;
+        text-align: center;
+    }}
+
+    /* 4. Centralizando os Labels e Inputs */
+    .stTextInput, .stFileUploader {{
+        width: 100%;
+    }}
+    
+    .stTextInput label, .stFileUploader label {{
+        color: #e3e3e3 !important;
+        width: 100% !important;
+        display: block !important;
+        text-align: center !important; /* Centraliza o texto do label */
+    }}
+
+    .stTextInput input {{
+        background-color: #1e1f20 !important;
+        border: 1px solid #444746 !important;
+        border-radius: 12px !important;
+        color: white !important;
+        text-align: center; /* Centraliza o cursor dentro do input */
+    }}
+
+    /* 5. BOTÃO GERAR CENTRALIZADO */
+    .stButton {{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }}
+
+    .stButton > button {{
+        background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+        color: white !important;
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 12px 40px !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        width: 100% !important;
+        max-width: 280px; /* Largura do botão */
+        height: 54px !important;
+        margin-top: 20px;
+        transition: 0.3s;
+    }}
+    
+    .stButton > button:hover {{
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(66, 133, 244, 0.5);
+    }}
+
+    /* Drag and Drop Dark */
+    .stFileUploader section {{
+        background-color: #1e1f20 !important;
+        border: 1px dashed #444746 !important;
+        border-radius: 12px !important;
+    }}
+
+    .footer-text {{
+        color: #8e918f;
+        font-size: 12px;
+        margin-top: 25px;
+        width: 100%;
+        text-align: center;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- ESTRUTURA DA INTERFACE ---
+
+st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
+
+st.markdown('<span class="emoji">🥳</span>', unsafe_allow_html=True)
+st.markdown('<div class="titulo">Gerador de Artes SECOM</div>', unsafe_allow_html=True)
+
+nome = st.text_input("Nome do Aniversariante", placeholder="Digite aqui...")
+cargo = st.text_input("Cargo ou Setor", placeholder="Ex: Coordenação...")
+foto_upload = st.file_uploader("Escolha uma foto", type=["jpg", "png", "jpeg"])
+
+gerar_arte = st.button("GERAR ARTE")
+
+st.markdown('<div class="footer-text">Desenvolvido por Júnior - SECOM</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
 # --- MOTOR DE GERAÇÃO ---
 if gerar_arte:
     if foto_upload and nome and cargo:
@@ -155,5 +288,3 @@ if gerar_arte:
                 st.error(f"Erro: {e}")
     else:
         st.info("⚠️ Preencha todos os campos para gerar.")
-
-
