@@ -98,7 +98,7 @@ st.markdown(f"""
 # "Sanduíche" de HTML para garantir que os widgets fiquem dentro do card estilizado
 st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
 
-st.markdown('<span class="emoji">✨</span>', unsafe_allow_html=True)
+st.markdown('<span class="emoji">🥳</span>', unsafe_allow_html=True)
 st.markdown('<div class="titulo">Gerador de Artes SECOM</div>', unsafe_allow_html=True)
 
 # Widgets do Streamlit
@@ -109,7 +109,7 @@ foto_upload = st.file_uploader("Escolha uma foto", type=["jpg", "png", "jpeg"])
 # O botão de gerar (agora centralizado pelo CSS)
 gerar_arte = st.button("GERAR ARTE")
 
-st.markdown('<div class="footer-text">Inteligência e Design • SECOM 2024</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer-text">Desenvolvido por Júnior - SECOM</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -161,4 +161,5 @@ if gerar_arte:
                 st.error(f"Erro no processamento: {e}")
     else:
         st.info("⚠️ Preencha todos os campos e suba uma foto para gerar.")
+
 
