@@ -15,107 +15,125 @@ def carregar_imagem_local(caminho):
 
 bg_base64 = carregar_imagem_local("background.jpg")
 
-# --- INTERFACE HTML/CSS ---
+# --- INTERFACE HTML/CSS RESPONSIVA ---
 st.markdown(f"""
     <style>
+    /* 1. Fundo da Página */
     [data-testid="stAppViewContainer"] {{
         background: url("data:image/png;base64,{bg_base64}");
         background-size: cover;
         background-position: center;
+        background-attachment: fixed;
     }}
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
-    .figma-container {{
+    /* 2. Reset de containers do Streamlit para Mobile */
+    [data-testid="stVerticalBlock"] {{
+        padding: 0px !important;
+        gap: 0px !important;
+    }}
+
+    /* 3. O Container Branco "Mestre" */
+    .main-card {{
         background: white;
         border-radius: 35px;
-        padding: 40px;
+        padding: 30px;
         box-shadow: 0px 20px 50px rgba(0,0,0,0.3);
         text-align: center;
-        max-width: 400px;
-        margin: auto;
+        width: 90%; /* Ocupa 90% da tela no mobile */
+        max-width: 420px; /* Limite de largura no desktop */
+        margin: 40px auto; /* Centraliza vertical e horizontalmente */
         font-family: 'Segoe UI', sans-serif;
+        position: relative;
+        z-index: 10;
     }}
 
-    .emoji {{ font-size: 50px; margin-bottom: 10px; }}
-    .titulo {{ font-weight: bold; color: #222; margin-bottom: 25px; line-height: 1.2; font-size: 20px; }}
+    /* Estilo dos textos internos */
+    .emoji {{ font-size: 50px; margin-bottom: 5px; }}
+    .titulo {{ 
+        font-weight: bold; 
+        color: #222; 
+        margin-bottom: 20px; 
+        font-size: 1.2rem; 
+        padding: 0 10px;
+    }}
+
+    /* Ajuste para que os inputs do Streamlit fiquem dentro do card */
+    .stTextInput, .stFileUploader, .stButton {{
+        margin-bottom: 15px !important;
+    }}
+
+    /* Estilização dos campos */
+    ::placeholder {{ color: #888 !important; }}
     
-    /* MUDANÇA DA COR DO PLACEHOLDER */
-    ::placeholder {{
-        color: #888888 !important; /* Cinza claro */
-        opacity: 1; 
-    }}
-
     .stTextInput input {{
         background-color: #F0F2F5 !important;
         border: none !important;
         border-radius: 12px !important;
-        color: #333 !important;
     }}
     
-    /* Estilo do Botão Azul de Gerar */
     .stButton > button {{
         background-color: #00A3FF !important;
         color: white !important;
         border-radius: 15px !important;
-        border: none !important;
         width: 100% !important;
-        height: 50px !important;
         font-weight: bold !important;
-        transition: 0.3s;
-    }}
-    
-    .stButton > button:hover {{
-        background-color: #0082CC !important;
-        transform: scale(1.02);
+        height: 50px;
     }}
 
-    .stFileUploader section {{
-        background-color: #F0F2F5 !important;
-        border: 2px dashed #00A3FF !important;
-        border-radius: 15px !important;
-        color: #00A3FF !important;
+    /* Ajustes Mobile */
+    @media (max-width: 480px) {{
+        .main-card {{
+            padding: 20px 15px;
+            margin: 20px auto;
+        }}
+        .titulo {{ font-size: 1rem; }}
     }}
     </style>
-
-    <div class="figma-container">
-        <div class="emoji">🥳</div>
-        <div class="titulo">Gerador de Artes para os Aniversariantes Automático!</div>
-    </div>
     """, unsafe_allow_html=True)
 
-# --- CAMPOS DE ENTRADA ---
-with st.container():
-    nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
-    cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
-    foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
-    
-    # O BOTÃO DE DISPARO
-    gerar_arte = st.button("🚀 CRIAR ARTE AGORA")
+# --- ESTRUTURA DO SITE ---
 
-    st.markdown("<p style='text-align:center; color:#999; font-size:12px; margin-top:20px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
+# Abrimos a "casca" branca
+st.markdown('<div class="main-card">', unsafe_allow_html=True)
 
-# --- LÓGICA DO MOTOR (SÓ EXECUTA SE CLICAR NO BOTÃO) ---
+# Conteúdo do Topo
+st.markdown('<div class="emoji">🥳</div>', unsafe_allow_html=True)
+st.markdown('<div class="titulo">Gerador de Artes para os Aniversariantes Automático!</div>', unsafe_allow_html=True)
+
+# Inputs (O Streamlit vai colocar eles aqui dentro)
+nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
+cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
+foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
+
+# Botão de Gerar
+gerar_arte = st.button("🚀 CRIAR ARTE AGORA")
+
+st.markdown("<p style='color:#999; font-size:11px; margin-top:20px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
+
+# Fechamos a "casca" branca
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- LÓGICA DO MOTOR (FORA DO CARD PARA NÃO EMPURRAR O LAYOUT) ---
 if gerar_arte:
     if not foto_upload or not nome or not cargo:
-        st.warning("⚠️ Por favor, preencha todos os campos e suba uma foto antes de gerar!")
+        st.error("Preencha todos os campos!")
     else:
-        with st.spinner('Construindo sua arte...'):
+        with st.spinner('Gerando...'):
             try:
-                # Motor de Imagem
                 base = Image.open("template.png").convert("RGBA")
-                
-                # Processamento da Foto
                 foto = Image.open(foto_upload).convert("RGBA")
-                foto = foto.resize((995, 995), Image.LANCZOS)
-                foto = foto.rotate(4, resample=Image.BICUBIC, expand=True)
                 
-                # Composição
+                # Motor de redimensionamento e rotação
+                foto = foto.resize((995, 995), Image.LANCZOS)
+                foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
+                
                 canvas = Image.new("RGBA", base.size, (0,0,0,0))
                 canvas.paste(foto, (35, 275), foto)
                 final = Image.alpha_composite(canvas, base)
                 
-                # Textos
                 draw = ImageDraw.Draw(final)
                 try:
                     f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
@@ -127,16 +145,15 @@ if gerar_arte:
                     w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
                     draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
                 except:
-                    st.error("Fontes não encontradas! Verifique os arquivos .ttf")
+                    pass
 
-                # EXIBIÇÃO DA PRÉVIA
-                st.write("---")
-                st.image(final, caption="Sua arte está pronta!", use_container_width=True)
+                # Prévia embaixo de tudo
+                st.markdown("### ✅ Prévia da sua Arte")
+                st.image(final, use_container_width=True)
                 
-                # BOTÃO DE DOWNLOAD
                 buf = io.BytesIO()
                 final.save(buf, format="PNG")
-                st.download_button("📥 Baixar Imagem", buf.getvalue(), f"niver_{nome}.png", "image/png")
+                st.download_button("📥 Baixar Imagem", buf.getvalue(), f"{nome}.png", "image/png")
                 
             except Exception as e:
-                st.error(f"Erro ao processar: {e}")
+                st.error(f"Erro: {e}")
