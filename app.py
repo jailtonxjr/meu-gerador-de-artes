@@ -35,7 +35,6 @@ st.markdown(f"""
     /* 3. Estilização dos Inputs (Dark Mode) */
     .stTextInput label, .stFileUploader label {{
         color: #e3e3e3 !important;
-        text-align: center !important;
         display: block !important;
         width: 100% !important;
         font-weight: 400 !important;
@@ -46,7 +45,6 @@ st.markdown(f"""
         border: 1px solid #444746 !important;
         border-radius: 12px !important;
         color: white !important;
-        text-align: center;
         height: 48px;
     }}
 
@@ -168,3 +166,4 @@ if gerar_arte:
                 st.error(f"Erro no processamento: {e}")
     else:
         st.warning("⚠️ Por favor, preencha todos os campos e selecione uma foto.")
+
