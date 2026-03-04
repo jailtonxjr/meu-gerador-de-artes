@@ -17,20 +17,6 @@ st.markdown(f"""
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
-    /* 2. O Card Estilo Glassmorphism */
-    .gemini-card {{
-        background: rgba(30, 31, 32, 0.7); /* Cinza levemente transparente */
-        backdrop-filter: blur(10px); /* Efeito de vidro fosco */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 40px 30px;
-        width: 100%;
-        max-width: 450px;
-        margin: 40px auto;
-        text-align: center;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-    }}
-
     /* 3. Textos */
     .emoji {{ font-size: 50px; margin-bottom: 10px; }}
     .titulo {{ 
@@ -111,7 +97,7 @@ if gerar_arte:
                 
                 # Ajuste da foto (Redimensionar e girar -4 graus)
                 foto = foto.resize((995, 995), Image.LANCZOS)
-                foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
+                foto = foto.rotate(4, resample=Image.BICUBIC, expand=True)
                 
                 # Composição
                 final = Image.new("RGBA", base.size, (0,0,0,0))
@@ -146,3 +132,4 @@ if gerar_arte:
                 st.error(f"Ocorreu um erro: {e}")
     else:
         st.info("Preencha todos os campos para continuar.")
+
