@@ -31,7 +31,7 @@ def remover_preto(img):
 
 # --- INTERFACE E DESIGN ---
 # IMPORTANTE: Coloque o link real da sua imagem aqui
-LINK_BACKGROUND = "https://raw.githubusercontent.com/seu-usuario/seu-repo/main/background.jpg"
+LINK_BACKGROUND = "https://raw.githubusercontent.com/jailtonxjr/meu-gerador-de-artes/main/background.jpg"
 
 st.markdown(f"""
     <style>
@@ -103,3 +103,4 @@ with st.container():
     
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<p style='color: #888; font-size: 13px;'>Desenvolvido por <b>SECOM
+
