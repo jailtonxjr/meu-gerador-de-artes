@@ -16,22 +16,6 @@ st.markdown(f"""
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
-    /* 2. CARD CENTRALIZADO (O segredo está aqui) */
-    .gemini-card {{
-        background: rgba(30, 31, 32, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 28px;
-        padding: 40px 30px;
-        width: 100%;
-        max-width: 450px;
-        margin: auto;
-        display: flex; /* Habilita o Flexbox */
-        flex-direction: column; /* Empilha os itens */
-        align-items: center; /* Centraliza horizontalmente */
-        justify-content: center;
-    }}
-
     /* 3. Textos (Emoji e Título) */
     .emoji {{ 
         font-size: 60px; 
@@ -72,6 +56,7 @@ st.markdown(f"""
 
     /* 5. BOTÃO GERAR CENTRALIZADO */
     .stButton {{
+        widht: 100%;
         display: flex;
         justify-content: center;
         width: 100%;
@@ -170,3 +155,4 @@ if gerar_arte:
                 st.error(f"Erro: {e}")
     else:
         st.info("⚠️ Preencha todos os campos para gerar.")
+
