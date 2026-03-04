@@ -16,27 +16,11 @@ st.markdown(f"""
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
-    /* 2. O Card Gemini (Centralizando o conteúdo interno) */
-    .gemini-card {{
-        background: rgba(30, 31, 32, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 28px;
-        padding: 40px 30px;
-        width: 100%;
-        max-width: 450px;
-        margin: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Centraliza itens no eixo X */
-        text-align: center;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-    }}
-
     /* 3. Textos (Emoji e Título) */
     .emoji {{ 
         font-size: 60px; 
         margin-bottom: 5px; 
+        text-align: center;
         display: block;
         width: 100%;
     }}
@@ -47,13 +31,13 @@ st.markdown(f"""
         font-weight: 500;
         margin-bottom: 30px;
         width: 100%;
+         text-align: center;
     }}
 
     /* 4. Centralizando os Labels do Streamlit */
     .stTextInput label, .stFileUploader label {{
         color: #e3e3e3 !important;
         width: 100% !important;
-        text-align: center !important; /* Centraliza o texto do label */
         display: block !important;
     }}
 
@@ -62,7 +46,6 @@ st.markdown(f"""
         border: 1px solid #444746 !important;
         border-radius: 12px !important;
         color: white !important;
-        text-align: center; /* Texto digitado centralizado */
     }}
 
     /* 5. Botão GERAR (Centralização e Estilo) */
@@ -142,7 +125,7 @@ if gerar_arte:
                 # 2. Processamento da Foto (Redimensionar e girar)
                 foto = foto.resize((995, 995), Image.LANCZOS)
                 # Note: mudei para -4 ou 4 dependendo da inclinação do seu template
-                foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True) 
+                foto = foto.rotate(4, resample=Image.BICUBIC, expand=True) 
                 
                 # 3. Composição
                 final = Image.new("RGBA", base.size, (0,0,0,0))
@@ -178,3 +161,4 @@ if gerar_arte:
                 st.error(f"Erro no processamento: {e}")
     else:
         st.info("⚠️ Preencha todos os campos e suba uma foto para gerar.")
+
