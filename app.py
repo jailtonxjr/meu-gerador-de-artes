@@ -116,7 +116,7 @@ if foto_upload and nome and cargo:
         # Foto do usuário
         foto = Image.open(foto_upload).convert("RGBA")
         foto = foto.resize((995, 995), Image.LANCZOS)
-        foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
+        foto = foto.rotate(4, resample=Image.BICUBIC, expand=True)
         
         # Montagem
         arte_final = Image.new("RGBA", base.size, (0,0,0,0))
@@ -150,3 +150,4 @@ if foto_upload and nome and cargo:
         
     except Exception as e:
         st.error(f"Erro: {e}")
+
