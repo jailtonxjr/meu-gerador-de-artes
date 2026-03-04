@@ -16,6 +16,22 @@ st.markdown(f"""
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
+    /* 2. CARD CENTRALIZADO (O segredo está aqui) */
+    .gemini-card {{
+        background: rgba(30, 31, 32, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px;
+        padding: 40px 30px;
+        width: 100%;
+        max-width: 450px;
+        margin: auto;
+        display: flex; /* Habilita o Flexbox */
+        flex-direction: column; /* Empilha os itens */
+        align-items: center; /* Centraliza horizontalmente */
+        justify-content: center;
+    }}
+
     /* 3. Textos (Emoji e Título) */
     .emoji {{ 
         font-size: 60px; 
@@ -31,14 +47,19 @@ st.markdown(f"""
         font-weight: 500;
         margin-bottom: 30px;
         width: 100%;
-         text-align: center;
+        text-align: center;
     }}
 
-    /* 4. Centralizando os Labels do Streamlit */
+    /* 4. Centralizando os Labels e Inputs */
+    .stTextInput, .stFileUploader {{
+        width: 100%;
+    }}
+    
     .stTextInput label, .stFileUploader label {{
         color: #e3e3e3 !important;
         width: 100% !important;
         display: block !important;
+        text-align: center !important; /* Centraliza o texto do label */
     }}
 
     .stTextInput input {{
@@ -46,9 +67,10 @@ st.markdown(f"""
         border: 1px solid #444746 !important;
         border-radius: 12px !important;
         color: white !important;
+        text-align: center; /* Centraliza o cursor dentro do input */
     }}
 
-    /* 5. Botão GERAR (Centralização e Estilo) */
+    /* 5. BOTÃO GERAR CENTRALIZADO */
     .stButton {{
         display: flex;
         justify-content: center;
@@ -63,8 +85,8 @@ st.markdown(f"""
         padding: 12px 40px !important;
         font-weight: 600 !important;
         font-size: 16px !important;
-        width: 100% !important; /* Faz o botão ocupar a largura do card */
-        max-width: 250px; /* Mas limita para não ficar exagerado */
+        width: 100% !important;
+        max-width: 280px; /* Largura do botão */
         height: 54px !important;
         margin-top: 20px;
         transition: 0.3s;
@@ -82,7 +104,6 @@ st.markdown(f"""
         border-radius: 12px !important;
     }}
 
-    /* Ajuste para o texto de rodapé */
     .footer-text {{
         color: #8e918f;
         font-size: 12px;
@@ -95,71 +116,30 @@ st.markdown(f"""
 
 # --- ESTRUTURA DA INTERFACE ---
 
-# "Sanduíche" de HTML para garantir que os widgets fiquem dentro do card estilizado
 st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
 
 st.markdown('<span class="emoji">🥳</span>', unsafe_allow_html=True)
 st.markdown('<div class="titulo">Gerador de Artes SECOM</div>', unsafe_allow_html=True)
 
-# Widgets do Streamlit
 nome = st.text_input("Nome do Aniversariante", placeholder="Digite aqui...")
 cargo = st.text_input("Cargo ou Setor", placeholder="Ex: Coordenação...")
 foto_upload = st.file_uploader("Escolha uma foto", type=["jpg", "png", "jpeg"])
 
-# O botão de gerar (agora centralizado pelo CSS)
 gerar_arte = st.button("GERAR ARTE")
 
 st.markdown('<div class="footer-text">Desenvolvido por Júnior - SECOM</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- MOTOR DE GERAÇÃO (Pillow) ---
+# --- MOTOR DE GERAÇÃO ---
 if gerar_arte:
     if foto_upload and nome and cargo:
         with st.spinner('Construindo arte...'):
             try:
-                # 1. Carregamento
                 base = Image.open("template.png").convert("RGBA")
                 foto = Image.open(foto_upload).convert("RGBA")
                 
-                # 2. Processamento da Foto (Redimensionar e girar)
                 foto = foto.resize((995, 995), Image.LANCZOS)
-                # Note: mudei para -4 ou 4 dependendo da inclinação do seu template
                 foto = foto.rotate(4, resample=Image.BICUBIC, expand=True) 
                 
-                # 3. Composição
-                final = Image.new("RGBA", base.size, (0,0,0,0))
-                # Ajuste esses números (35, 275) se a foto ficar fora do lugar
-                final.paste(foto, (35, 275), foto) 
-                final = Image.alpha_composite(final, base)
-                
-                # 4. Escrita do Texto
-                draw = ImageDraw.Draw(final)
-                try:
-                    f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
-                    f_cargo = ImageFont.truetype("Poppins-Regular.ttf", 34)
-                    
-                    # Centralizar Nome (Largura do template é 1080)
-                    w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
-                    draw.text(((1080 - w_n)/2, 1115), nome, fill="white", font=f_nome)
-                    
-                    # Centralizar Cargo
-                    w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
-                    draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
-                except:
-                    st.error("Fontes não encontradas! Verifique os arquivos .ttf")
-
-                # 5. Resultado
-                st.markdown("---")
-                st.image(final, caption="Arte Gerada com Sucesso!", use_container_width=True)
-                
-                buf = io.BytesIO()
-                final.save(buf, format="PNG")
-                st.download_button("📥 Baixar Arte Final", buf.getvalue(), f"niver_{nome}.png", "image/png")
-                
-            except Exception as e:
-                st.error(f"Erro no processamento: {e}")
-    else:
-        st.info("⚠️ Preencha todos os campos e suba uma foto para gerar.")
-
-
+                final = Image.new("RGBA", base.size, (0
