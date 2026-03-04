@@ -30,20 +30,17 @@ def remover_preto(img):
     return img
 
 # --- INTERFACE E DESIGN ---
-# IMPORTANTE: Coloque o link real da sua imagem aqui
+# IMPORTANTE: Substitua 'seu-usuario' e 'seu-repo' pelos seus dados reais do GitHub
 LINK_BACKGROUND = "https://raw.githubusercontent.com/jailtonxjr/meu-gerador-de-artes/main/background.jpg"
 
 st.markdown(f"""
     <style>
-    /* Fundo da Página */
     .stApp {{
         background: url("{LINK_BACKGROUND}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }}
-
-    /* Container Principal (O Card Branco) */
     .main-card {{
         background-color: white;
         padding: 40px 30px;
@@ -54,53 +51,70 @@ st.markdown(f"""
         max-width: 450px;
         text-align: center;
     }}
-
-    /* Estilização de Textos e Títulos */
-    .main-card h3 {{
-        color: #333 !important;
-        font-family: 'Poppins', sans-serif;
-        margin-top: 10px;
-    }}
-
-    /* Inputs do Streamlit */
     .stTextInput input {{
         background-color: #f0f2f5 !important;
         border: none !important;
         border-radius: 10px !important;
         color: #333 !important;
     }}
-
-    /* Botão de Upload Azul */
     .stFileUploader section {{
         background-color: #0099ff !important;
         border: none !important;
         border-radius: 15px !important;
         color: white !important;
     }}
-    
-    .stFileUploader label {{
-        color: #444 !important;
-        font-weight: 600 !important;
-    }}
-
-    /* Esconder elementos padrão */
     #MainMenu, footer, header {{visibility: hidden;}}
     </style>
     """, unsafe_allow_html=True)
 
-# --- CONSTRUÇÃO DO CARD (TUDO DENTRO DA DIV) ---
-# Usamos um container do Streamlit para agrupar tudo visualmente
+# --- CONSTRUÇÃO DO CARD ---
 with st.container():
-    # Início do Card
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    
     st.markdown('<p style="font-size: 50px; margin-bottom: 0;">🥳</p>', unsafe_allow_html=True)
-    st.markdown("### Gerador de Artes para os Aniversariantes Automático!")
+    st.markdown('<h3 style="color: #333;">Gerador de Artes para os Aniversariantes Automático!</h3>', unsafe_allow_html=True)
     
     nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
     cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
     foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
     
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #888; font-size: 13px;'>Desenvolvido por <b>SECOM
+    # LINHA CORRIGIDA ABAIXO (Tudo em uma linha só para evitar o SyntaxError)
+    st.markdown("<p style='color: #888; font-size: 13px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
+# --- LÓGICA DE GERAÇÃO ---
+if foto_upload and nome and cargo:
+    try:
+        base = Image.open("template.png").convert("RGBA")
+        template_sem_preto = remover_preto(base)
+        
+        foto = Image.open(foto_upload).convert("RGBA")
+        foto = cortar_cover(foto, (995, 995))
+        foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
+        
+        nova_l, nova_a = foto.size
+        pos_ajustada = (50 - (nova_l - 995) // 2, 285 - (nova_a - 995) // 2)
+        
+        fundo = Image.new("RGBA", base.size, (0,0,0,0))
+        fundo.paste(foto, pos_ajustada, foto)
+        arte = Image.alpha_composite(fundo, template_sem_preto)
+        
+        draw = ImageDraw.Draw(arte)
+        try:
+            f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
+            f_cargo = ImageFont.truetype("Poppins-Regular.ttf", 34)
+            w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
+            draw.text((540 - w_n/2, 1115), nome, fill="white", font=f_nome)
+            w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
+            draw.text((540 - w_c/2, 1200), cargo.upper(), font=f_cargo, fill="white")
+        except:
+            st.warning("Fontes não encontradas, usando padrão.")
+
+        st.markdown("---")
+        st.image(arte, caption="Prévia da Arte", use_container_width=True)
+        
+        img_byte_arr = io.BytesIO()
+        arte.save(img_byte_arr, format='PNG')
+        st.download_button(label="✅ Baixar Arte Pronta", data=img_byte_arr.getvalue(), file_name=f"aniversariante_{nome}.png", mime="image/png")
+    except Exception as e:
+        st.error(f"Erro: {e}")
