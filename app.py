@@ -29,62 +29,81 @@ def remover_preto(img):
     img.putdata(novo)
     return img
 
-# --- INTERFACE E DESIGN ---
-# IMPORTANTE: Substitua 'seu-usuario' e 'seu-repo' pelos seus dados reais do GitHub
+# --- INTERFACE E DESIGN (A MÁGICA ESTÁ AQUI) ---
+# DICA: Verifique se o nome da imagem no seu GitHub é exatamente background.jpg
 LINK_BACKGROUND = "https://raw.githubusercontent.com/jailtonxjr/meu-gerador-de-artes/main/background.jpg"
 
 st.markdown(f"""
     <style>
+    /* 1. Fundo da Página */
     .stApp {{
         background: url("{LINK_BACKGROUND}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }}
-    .main-card {{
+
+    /* 2. Transformando o bloco principal no seu Card Branco */
+    [data-testid="stVerticalBlock"] > div:has(div.stMarkdown) {{
         background-color: white;
-        padding: 40px 30px;
+        padding: 50px 30px !important;
         border-radius: 30px;
         box-shadow: 0px 15px 35px rgba(0,0,0,0.3);
-        margin: 20px auto;
-        width: 100%;
-        max-width: 450px;
+        max-width: 480px;
+        margin: auto;
+    }}
+
+    /* 3. Estilizando Títulos e Textos */
+    h3 {{
+        color: #333 !important;
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+    }}
+    
+    .stMarkdown p {{
         text-align: center;
     }}
+
+    /* 4. Inputs e Botões */
     .stTextInput input {{
         background-color: #f0f2f5 !important;
         border: none !important;
         border-radius: 10px !important;
         color: #333 !important;
     }}
+
     .stFileUploader section {{
         background-color: #0099ff !important;
         border: none !important;
         border-radius: 15px !important;
         color: white !important;
     }}
-    #MainMenu, footer, header {{visibility: hidden;}}
+
+    /* Esconde cabeçalhos e menus padrão do Streamlit */
+    header, footer, #MainMenu {{visibility: hidden;}}
     </style>
     """, unsafe_allow_html=True)
 
-# --- CONSTRUÇÃO DO CARD ---
-with st.container():
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.markdown('<p style="font-size: 50px; margin-bottom: 0;">🥳</p>', unsafe_allow_html=True)
-    st.markdown('<h3 style="color: #333;">Gerador de Artes para os Aniversariantes Automático!</h3>', unsafe_allow_html=True)
-    
-    nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
-    cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
-    foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    # LINHA CORRIGIDA ABAIXO (Tudo em uma linha só para evitar o SyntaxError)
-    st.markdown("<p style='color: #888; font-size: 13px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+# --- CONTEÚDO DO SITE ---
+# O emoji e o título
+st.markdown('<p style="font-size: 60px; margin: 0;">🥳</p>', unsafe_allow_html=True)
+st.markdown("### Gerador de Artes para os Aniversariantes Automático!")
 
-# --- LÓGICA DE GERAÇÃO ---
+# Espaçamento manual
+st.write("")
+
+# Campos de preenchimento
+nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
+cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
+foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
+
+# Rodapé simples
+st.markdown("<p style='color: #888; font-size: 13px; margin-top: 20px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
+
+# --- LÓGICA DE GERAÇÃO DA ARTE ---
 if foto_upload and nome and cargo:
     try:
+        # Carregamento das imagens
         base = Image.open("template.png").convert("RGBA")
         template_sem_preto = remover_preto(base)
         
@@ -92,6 +111,7 @@ if foto_upload and nome and cargo:
         foto = cortar_cover(foto, (995, 995))
         foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
         
+        # Ajuste de posição final
         nova_l, nova_a = foto.size
         pos_ajustada = (50 - (nova_l - 995) // 2, 285 - (nova_a - 995) // 2)
         
@@ -99,6 +119,7 @@ if foto_upload and nome and cargo:
         fundo.paste(foto, pos_ajustada, foto)
         arte = Image.alpha_composite(fundo, template_sem_preto)
         
+        # Desenho dos textos
         draw = ImageDraw.Draw(arte)
         try:
             f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
@@ -108,13 +129,19 @@ if foto_upload and nome and cargo:
             w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
             draw.text((540 - w_c/2, 1200), cargo.upper(), font=f_cargo, fill="white")
         except:
-            st.warning("Fontes não encontradas, usando padrão.")
+            st.warning("Fontes .ttf não encontradas. Verifique se estão na pasta do GitHub.")
 
-        st.markdown("---")
-        st.image(arte, caption="Prévia da Arte", use_container_width=True)
+        # Área de Resultado (aparece abaixo do card)
+        st.write("---")
+        st.image(arte, caption="Sua arte pronta!", use_container_width=True)
         
         img_byte_arr = io.BytesIO()
         arte.save(img_byte_arr, format='PNG')
-        st.download_button(label="✅ Baixar Arte Pronta", data=img_byte_arr.getvalue(), file_name=f"aniversariante_{nome}.png", mime="image/png")
+        st.download_button(
+            label="✅ Baixar Arte em PNG", 
+            data=img_byte_arr.getvalue(), 
+            file_name=f"aniversariante_{nome}.png", 
+            mime="image/png"
+        )
     except Exception as e:
-        st.error(f"Erro: {e}")
+        st.error(f"Erro ao processar imagem: {e}")
