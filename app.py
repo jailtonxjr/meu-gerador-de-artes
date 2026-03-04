@@ -15,7 +15,7 @@ def carregar_imagem_local(caminho):
 
 bg_base64 = carregar_imagem_local("background.jpg")
 
-# --- INTERFACE HTML/CSS RESPONSIVA ---
+# --- INTERFACE HTML/CSS (O CARD UNIFICADO) ---
 st.markdown(f"""
     <style>
     /* 1. Fundo da Página */
@@ -28,105 +28,103 @@ st.markdown(f"""
     
     [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
 
-    /* 2. Reset de containers do Streamlit para Mobile */
+    /* 2. Centralização do Container Principal do Streamlit */
     [data-testid="stVerticalBlock"] {{
-        padding: 0px !important;
+        align-items: center !important;
         gap: 0px !important;
     }}
 
-    /* 3. O Container Branco "Mestre" */
-    .main-card {{
-        background: white;
+    /* 3. O CARD BRANCO (MOLDURA) */
+    .figma-card {{
+        background-color: white;
+        padding: 40px 30px;
         border-radius: 35px;
-        padding: 30px;
-        box-shadow: 0px 20px 50px rgba(0,0,0,0.3);
-        text-align: center;
-        width: 90%; /* Ocupa 90% da tela no mobile */
-        max-width: 420px; /* Limite de largura no desktop */
-        margin: 40px auto; /* Centraliza vertical e horizontalmente */
-        font-family: 'Segoe UI', sans-serif;
-        position: relative;
-        z-index: 10;
+        box-shadow: 0px 15px 45px rgba(0,0,0,0.3);
+        width: 100%;
+        max-width: 450px; /* Largura fixa do card */
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centraliza tudo horizontalmente dentro do card */
     }}
 
-    /* Estilo dos textos internos */
-    .emoji {{ font-size: 50px; margin-bottom: 5px; }}
+    /* 4. Estilização dos Elementos Internos */
+    .emoji {{ font-size: 60px; margin-bottom: 10px; }}
     .titulo {{ 
         font-weight: bold; 
         color: #222; 
-        margin-bottom: 20px; 
-        font-size: 1.2rem; 
-        padding: 0 10px;
+        text-align: center;
+        margin-bottom: 25px; 
+        font-size: 20px;
+        line-height: 1.2;
     }}
 
-    /* Ajuste para que os inputs do Streamlit fiquem dentro do card */
+    /* Ajuste para que os Widgets ocupem a largura total do card */
     .stTextInput, .stFileUploader, .stButton {{
-        margin-bottom: 15px !important;
+        width: 100% !important;
     }}
 
-    /* Estilização dos campos */
+    /* Placeholder e Inputs */
     ::placeholder {{ color: #888 !important; }}
-    
     .stTextInput input {{
         background-color: #F0F2F5 !important;
         border: none !important;
         border-radius: 12px !important;
     }}
-    
+
+    /* Botão Centralizado e Estilizado */
     .stButton > button {{
         background-color: #00A3FF !important;
         color: white !important;
         border-radius: 15px !important;
+        border: none !important;
         width: 100% !important;
+        height: 50px !important;
         font-weight: bold !important;
-        height: 50px;
+        margin-top: 10px;
     }}
-
-    /* Ajustes Mobile */
+    
+    /* Ajuste Mobile */
     @media (max-width: 480px) {{
-        .main-card {{
-            padding: 20px 15px;
-            margin: 20px auto;
-        }}
-        .titulo {{ font-size: 1rem; }}
+        .figma-card {{ width: 90%; padding: 25px 20px; }}
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- ESTRUTURA DO SITE ---
+# --- CONSTRUÇÃO DO CONTEÚDO ---
 
-# Abrimos a "casca" branca
-st.markdown('<div class="main-card">', unsafe_allow_html=True)
+# Abrimos o Card Branco
+st.markdown('<div class="figma-card">', unsafe_allow_html=True)
 
-# Conteúdo do Topo
+# Emoji e Título (Centralizados pelo CSS .figma-card)
 st.markdown('<div class="emoji">🥳</div>', unsafe_allow_html=True)
 st.markdown('<div class="titulo">Gerador de Artes para os Aniversariantes Automático!</div>', unsafe_allow_html=True)
 
-# Inputs (O Streamlit vai colocar eles aqui dentro)
+# Widgets (agora estão visualmente "dentro" do card)
 nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
 cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
 foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
 
-# Botão de Gerar
+# Botão Criar Arte
 gerar_arte = st.button("🚀 CRIAR ARTE AGORA")
 
 st.markdown("<p style='color:#999; font-size:11px; margin-top:20px;'>Desenvolvido por <b>SECOM</b></p>", unsafe_allow_html=True)
 
-# Fechamos a "casca" branca
+# Fechamos o Card Branco
 st.markdown('</div>', unsafe_allow_html=True)
 
 
-# --- LÓGICA DO MOTOR (FORA DO CARD PARA NÃO EMPURRAR O LAYOUT) ---
+# --- MOTOR DE GERAÇÃO (FORA DO CARD) ---
 if gerar_arte:
     if not foto_upload or not nome or not cargo:
-        st.error("Preencha todos os campos!")
+        st.error("Preencha todos os campos e suba uma foto!")
     else:
-        with st.spinner('Gerando...'):
+        with st.spinner('Gerando arte...'):
             try:
                 base = Image.open("template.png").convert("RGBA")
                 foto = Image.open(foto_upload).convert("RGBA")
                 
-                # Motor de redimensionamento e rotação
+                # Redimensionar e Girar (conforme parâmetros anteriores)
                 foto = foto.resize((995, 995), Image.LANCZOS)
                 foto = foto.rotate(-4, resample=Image.BICUBIC, expand=True)
                 
@@ -134,6 +132,7 @@ if gerar_arte:
                 canvas.paste(foto, (35, 275), foto)
                 final = Image.alpha_composite(canvas, base)
                 
+                # Desenhar Texto
                 draw = ImageDraw.Draw(final)
                 try:
                     f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
@@ -147,13 +146,13 @@ if gerar_arte:
                 except:
                     pass
 
-                # Prévia embaixo de tudo
-                st.markdown("### ✅ Prévia da sua Arte")
-                st.image(final, use_container_width=True)
+                # Mostrar resultado abaixo do card
+                st.markdown("---")
+                st.image(final, caption="Sua arte pronta!", use_container_width=True)
                 
                 buf = io.BytesIO()
                 final.save(buf, format="PNG")
-                st.download_button("📥 Baixar Imagem", buf.getvalue(), f"{nome}.png", "image/png")
+                st.download_button("📥 Baixar Imagem", buf.getvalue(), f"arte_{nome}.png", "image/png")
                 
             except Exception as e:
                 st.error(f"Erro: {e}")
