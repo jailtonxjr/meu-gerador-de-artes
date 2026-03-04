@@ -1,180 +1,213 @@
-import streamlit as st
-from PIL import Image, ImageDraw, ImageFont, ImageOps
-import io
-
-# --- CONFIGURAÇÕES DE PÁGINA ---
-st.set_page_config(page_title="Gerador SECOM - Pro", layout="centered")
-
-# --- CSS ESTILO GEMINI (CENTRALIZAÇÃO ABSOLUTA) ---
-st.markdown(f"""
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador SECOM Pro - JS Edition</title>
     <style>
-    /* 1. Fundo Geral Estilo Gemini */
-    [data-testid="stAppViewContainer"] {{
-        background-color: #131314;
-        background-image: radial-gradient(circle at top right, #1e1e20, #131314);
-    }}
-    
-    [data-testid="stHeader"], [data-testid="stToolbar"] {{visibility: hidden;}}
+        /* CSS ESTILO GEMINI */
+        body {
+            background: radial-gradient(circle at top right, #1e1e20, #131314);
+            color: #e3e3e3;
+            font-family: 'Google Sans', 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
 
-    /* 2. Centralização de Textos */
-    .emoji {{ 
-        font-size: 65px; 
-        text-align: center;
-        display: block;
-        margin-top: 30px;
-    }}
-    .titulo {{ 
-        color: #e3e3e3; 
-        font-family: 'Google Sans', sans-serif;
-        font-size: 26px;
-        font-weight: 500;
-        margin-bottom: 40px;
-        text-align: center;
-    }}
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+        }
 
-    /* 3. Estilização dos Inputs (Dark Mode) */
-    .stTextInput label, .stFileUploader label {{
-        color: #e3e3e3 !important;
-        text-align: center !important;
-        display: block !important;
-        width: 100% !important;
-    }}
+        h1 { font-weight: 500; font-size: 24px; margin-bottom: 30px; }
 
-    .stTextInput input {{
-        background-color: #1e1f20 !important;
-        border: 1px solid #444746 !important;
-        border-radius: 12px !important;
-        color: white !important;
-        text-align: center;
-        height: 48px;
-    }}
+        .input-group { margin-bottom: 20px; text-align: left; }
 
-    /* 4. CENTRALIZAÇÃO TOTAL DO BOTÃO (FORÇA BRUTA) */
-    /* Faz o container do botão ocupar toda a largura horizontal */
-    [data-testid="stVerticalBlock"] > div:has(div.stButton), .stButton {{
-        width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }}
+        label { display: block; margin-bottom: 8px; font-size: 14px; color: #8e918f; text-align: center; }
 
-    .stButton > button {{
-        background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
-        color: white !important;
-        border: none !important;
-        border-radius: 50px !important;
-        padding: 12px 60px !important;
-        font-weight: 600 !important;
-        font-size: 16px !important;
-        transition: 0.3s ease;
-        width: auto !important;
-        min-width: 250px;
-        margin-top: 20px;
-    }}
-    
-    .stButton > button:hover {{
-        transform: scale(1.05);
-        box-shadow: 0 0 25px rgba(66, 133, 244, 0.4);
-    }}
+        input {
+            width: 100%;
+            padding: 14px;
+            background: #1e1f20;
+            border: 1px solid #444746;
+            border-radius: 12px;
+            color: white;
+            box-sizing: border-box;
+            text-align: center;
+            transition: border 0.3s;
+        }
 
-    /* Estilização do Drag and Drop */
-    .stFileUploader section {{
-        background-color: #1e1f20 !important;
-        border: 1px dashed #444746 !important;
-        border-radius: 12px !important;
-    }}
+        input:focus { border-color: #4285f4; outline: none; }
 
-    .footer-text {{
-        color: #8e918f;
-        font-size: 12px;
-        margin-top: 40px;
-        text-align: center;
-        padding-bottom: 50px;
-    }}
+        /* Estilo unificado para os botões */
+        .btn-acao {
+            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+
+        .btn-acao:hover { transform: scale(1.02); }
+
+        canvas { display: none; } 
+
+        #preview-container { margin-top: 30px; display: none; }
+
+        #resultado-final {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
     </style>
-    """, unsafe_allow_html=True)
+</head>
+<body>
 
-# --- INTERFACE VISUAL ---
-st.markdown('<span class="emoji">🥳</span>', unsafe_allow_html=True)
-st.markdown('<div class="titulo">Gerador de Artes SECOM</div>', unsafe_allow_html=True)
+<div class="container">
+    <div class="emoji" style="font-size: 50px;">✨</div>
+    <h1>Gerador de Artes SECOM</h1>
 
-nome = st.text_input("Nome do Aniversariante", placeholder="Digite o nome aqui...")
-cargo = st.text_input("Cargo ou Setor", placeholder="Ex: Coordenação de Comunicação")
-foto_upload = st.file_uploader("Suba a foto do aniversariante", type=["jpg", "png", "jpeg"])
+    <div class="input-group">
+        <label>Nome do Aniversariante</label>
+        <input type="text" id="nome" placeholder="Ex: Fulano da Silva">
+    </div>
 
-# Botão Centralizado
-gerar_arte = st.button("GERAR ARTE")
+    <div class="input-group">
+        <label>Cargo ou Setor</label>
+        <input type="text" id="cargo" placeholder="Ex: Secretário de ...">
+    </div>
 
-st.markdown('<div class="footer-text">Desenvolvido por Júnior • SECOM 2026</div>', unsafe_allow_html=True)
+    <div class="input-group">
+        <label>Foto do Aniversariante</label>
+        <input type="file" id="foto-input" accept="image/*">
+    </div>
 
-# --- MOTOR DE GERAÇÃO (CORTE REDONDO SEM DISTORÇÃO) ---
-if gerar_arte:
-    if foto_upload and nome and cargo:
-        with st.spinner('Processando imagem...'):
-            try:
-                # 1. Carregar arquivos
-                base = Image.open("template.png").convert("RGBA")
-                foto_img = Image.open(foto_upload).convert("RGBA")
-                
-               # 2. Corte Central (Center Crop) Quadrado
-                # Mantém a proporção e garante que a foto vire um quadrado de 995x995
-                tamanho_alvo = 995
-                foto_final = ImageOps.fit(foto_img, (tamanho_alvo, tamanho_alvo), Image.LANCZOS)
-                
-                # 3. Rotação (Ajuste para alinhar com a moldura inclinada)
-                # Removendo a máscara, a foto agora rotaciona com os cantos retos (90°)
-                foto_final = foto_final.rotate(2, resample=Image.BICUBIC, expand=True) 
-                
-                # 4. Composição
-                canvas = Image.new("RGBA", base.size, (0,0,0,0))
-                # Aqui a foto entra no seu template sem o corte redondo
-                canvas.paste(foto_final, (35, 275), foto_final)
-                
-                # 5. Composição no Template
-                canvas = Image.new("RGBA", base.size, (0,0,0,0))
-                # Coordenadas X, Y para encaixar no buraco do template
-                canvas.paste(foto_final, (20, 280), foto_final) 
-                arte_final = Image.alpha_composite(canvas, base)
-                
-                # 6. Escrever Textos Centralizados
-                draw = ImageDraw.Draw(arte_final)
-                try:
-                    f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
-                    f_cargo = ImageFont.truetype("Poppins-Regular.ttf", 34)
-                    
-                    # Nome
-                    w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
-                    draw.text(((1080 - w_n)/2, 1115), nome, fill="white", font=f_nome)
-                    
-                    # Cargo
-                    w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
-                    draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
-                except:
-                    st.warning("Fontes Poppins não encontradas. Verifique se os arquivos .ttf estão na pasta.")
+    <button class="btn-acao" onclick="processarArte()">CRIAR ARTE AGORA</button>
 
-                # 7. Exibição da Prévia e Download
-                st.markdown("---")
-                st.image(arte_final, caption="Sua arte foi gerada!", use_container_width=True)
-                
-                buf = io.BytesIO()
-                arte_final.save(buf, format="PNG")
-                
-                # Botão de download também centralizado pelo CSS acima
-                st.download_button(
-                    label="📥 Baixar Arte Final",
-                    data=buf.getvalue(),
-                    file_name=f"niver_{nome}.png",
-                    mime="image/png"
-                )
-                
-            except Exception as e:
-                st.error(f"Erro no processamento: {e}")
-    else:
-        st.warning("⚠️ Preencha todos os campos e selecione uma foto antes de continuar.")
+    <div id="preview-container">
+        <img id="resultado-final" src="" alt="Arte Final">
+        <a id="link-download" class="btn-acao" download="aniversariante.png">📥 BAIXAR IMAGEM</a>
+    </div>
 
+    <canvas id="motorCanvas" width="1080" height="1920"></canvas>
+</div>
 
+<script>
+    function formatarTexto(texto) {
+        if (!texto) return "";
+        const excecoes = ['de', 'da', 'do', 'dos', 'das', 'e', 'em', 'no', 'na'];
+        return texto.toLowerCase().split(' ').map(palavra => {
+            if (excecoes.includes(palavra) && palavra !== "") {
+                return palavra;
+            }
+            return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+        }).join(' ');
+    }
 
+    async function processarArte() {
+        const nomeBruto = document.getElementById('nome').value;
+        const cargoBruto = document.getElementById('cargo').value;
+        
+        const nome = formatarTexto(nomeBruto);
+        const cargo = formatarTexto(cargoBruto);
+        const fotoInput = document.getElementById('foto-input').files[0];
+        
+        if(!nome || !cargo || !fotoInput) {
+            alert("Preencha todos os campos!");
+            return;
+        }
 
+        const canvas = document.getElementById('motorCanvas');
+        const ctx = canvas.getContext('2d');
 
+        const imgTemplate = new Image();
+        imgTemplate.crossOrigin = "anonymous"; 
+        imgTemplate.src = 'template.png'; 
 
+        imgTemplate.onload = async () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            const imgFoto = await carregarImagem(fotoInput);
+            const tamanhoAlvo = 995;
+            const coordsCrop = calcularCenterCrop(imgFoto, tamanhoAlvo);
+
+            ctx.save();
+            ctx.translate(35 + (tamanhoAlvo/2), 275 + (tamanhoAlvo/2)); 
+            ctx.rotate(-4 * Math.PI / 180); 
+            ctx.drawImage(
+                imgFoto, 
+                coordsCrop.x, coordsCrop.y, coordsCrop.width, coordsCrop.height, 
+                -tamanhoAlvo/2, -tamanhoAlvo/2, tamanhoAlvo, tamanhoAlvo 
+            );
+            ctx.restore();
+
+            ctx.drawImage(imgTemplate, 0, 0);
+
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            
+            // Nome - Aumentado para 70px
+            ctx.font = "bold 70px Poppins, Segoe UI, sans-serif";
+            ctx.fillText(nome, 540, 1178);
+
+            // Cargo
+            ctx.font = "34px Poppins, Segoe UI, sans-serif";
+            ctx.fillText(cargo, 540, 1250); // Ajustado levemente para baixo devido ao nome maior
+
+            try {
+                const dataURL = canvas.toDataURL("image/png");
+                document.getElementById('resultado-final').src = dataURL;
+                document.getElementById('link-download').href = dataURL;
+                document.getElementById('preview-container').style.display = 'block';
+                window.scrollTo(0, document.body.scrollHeight);
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao gerar imagem. Use o link do GitHub Pages.");
+            }
+        };
+    }
+
+    function carregarImagem(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function calcularCenterCrop(img, targetSize) {
+        let x, y, width, height;
+        const aspect = img.width / img.height;
+        if (aspect > 1) { 
+            height = img.height; width = img.height;
+            x = (img.width - img.height) / 2; y = 0;
+        } else { 
+            width = img.width; height = img.width;
+            x = 0; y = (img.height - img.width) / 2;
+        }
+        return { x, y, width, height };
+    }
+</script>
+
+</body>
+</html>
