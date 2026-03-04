@@ -6,7 +6,7 @@ import os
 # --- CONFIGURAÇÕES DE PÁGINA ---
 st.set_page_config(page_title="Gerador de Artes - SECOM", layout="centered")
 
-# --- FUNÇÕES DE PROCESSAMENTO (O MOTOR) ---
+# --- FUNÇÕES DE PROCESSAMENTO ---
 def cortar_cover(img, tamanho):
     largura, altura = img.size
     alvo_l, alvo_a = tamanho
@@ -29,17 +29,18 @@ def remover_preto(img):
     img.putdata(novo)
     return img
 
-# --- INTERFACE E DESIGN (A CARROCERIA) ---
+# --- INTERFACE E DESIGN ---
+# DICA: Substitua o link abaixo pelo link 'Raw' da sua imagem no GitHub
+LINK_BACKGROUND = "https://raw.githubusercontent.com/jailtonxjr/meu-gerador-de-artes/main/background.jpg"
+
 st.markdown(f"""
     <style>
-    /* 1. Fundo da Página */
     .stApp {{
-        background: url("https://raw.githubusercontent.com/seu-usuario/seu-repo/main/background.jpg"); /* OU use o caminho local se estiver rodando no PC */
+        background: url("{LINK_BACKGROUND}");
         background-size: cover;
         background-position: center;
     }}
 
-    /* 2. O Card Branco Centralizado */
     .main-container {{
         background-color: white;
         padding: 40px;
@@ -48,10 +49,8 @@ st.markdown(f"""
         max-width: 450px;
         margin: auto;
         text-align: center;
-        font-family: 'Poppins', sans-serif;
     }}
 
-    /* 3. Estilização dos Inputs do Streamlit */
     .stTextInput input {{
         background-color: #f0f2f5 !important;
         border: none !important;
@@ -59,7 +58,6 @@ st.markdown(f"""
         padding: 12px !important;
     }}
 
-    /* 4. O Botão Azul de Upload (Simulando o seu design) */
     .stFileUploader section {{
         background-color: #0099ff !important;
         border: none !important;
@@ -68,11 +66,10 @@ st.markdown(f"""
     }}
     
     .stFileUploader label {{
-        color: white !important;
+        color: #555 !important;
         font-weight: bold !important;
     }}
 
-    /* Esconde elementos desnecessários do Streamlit */
     #MainMenu, footer, header {{visibility: hidden;}}
     </style>
     """, unsafe_allow_html=True)
@@ -80,30 +77,25 @@ st.markdown(f"""
 # --- CONSTRUÇÃO DO CARD ---
 st.markdown('<div class="main-container">', unsafe_allow_html=True)
 
-# Topo do Card (Emoji e Título)
-st.markdown("🥳", style="font-size: 50px;")
+# O erro estava aqui: agora usamos HTML puro para o emoji grande
+st.markdown('<p style="font-size: 50px; margin: 0;">🥳</p>', unsafe_allow_html=True)
 st.markdown("### Gerador de Artes para os Aniversariantes Automático!")
 
-# Inputs do Usuário
 nome = st.text_input("Nome e Sobrenome", placeholder="Ex: Fulano Primeiro...")
-cargo = st.text_input("Cargo", placeholder="Ex: Secretário de...")
+cargo = st.text_input("Cargo", placeholder="Ex: Secretária de...")
 foto_upload = st.file_uploader("Suba a foto aqui", type=["jpg", "png", "jpeg"])
 
-# Rodapé do Card
-st.markdown("---")
+st.markdown("<br>", unsafe_allow_html=True)
 st.caption("Desenvolvido por SECOM")
-
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- LÓGICA DE GERAÇÃO ---
 if foto_upload and nome and cargo:
-    # Parâmetros que definimos antes
     POS_FOTO = (50, 285)
     TAM_FOTO = (995, 995)
     ROT_FOTO = -4
     CENTRO_X = 540
 
-    # Processamento da imagem
     base = Image.open("template.png").convert("RGBA")
     template_sem_preto = remover_preto(base)
     
@@ -111,7 +103,6 @@ if foto_upload and nome and cargo:
     foto = cortar_cover(foto, TAM_FOTO)
     foto = foto.rotate(ROT_FOTO, resample=Image.BICUBIC, expand=True)
     
-    # Ajuste de posição
     nova_l, nova_a = foto.size
     pos_ajustada = (POS_FOTO[0] - (nova_l - TAM_FOTO[0]) // 2, POS_FOTO[1] - (nova_a - TAM_FOTO[1]) // 2)
     
@@ -119,7 +110,6 @@ if foto_upload and nome and cargo:
     fundo.paste(foto, pos_ajustada, foto)
     arte = Image.alpha_composite(fundo, template_sem_preto)
     
-    # Texto
     draw = ImageDraw.Draw(arte)
     try:
         f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
@@ -133,7 +123,7 @@ if foto_upload and nome and cargo:
     except:
         st.warning("Fontes não encontradas, usando fonte padrão.")
 
-    # Exibir resultado e Download
+    st.markdown("---")
     st.image(arte, caption="Prévia da Arte", use_container_width=True)
     
     img_byte_arr = io.BytesIO()
