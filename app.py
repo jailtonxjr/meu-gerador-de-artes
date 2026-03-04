@@ -142,4 +142,31 @@ if gerar_arte:
                 foto = foto.resize((995, 995), Image.LANCZOS)
                 foto = foto.rotate(4, resample=Image.BICUBIC, expand=True) 
                 
-                final = Image.new("RGBA", base.size, (0
+                final = Image.new("RGBA", base.size, (0,0,0,0))
+                final.paste(foto, (35, 275), foto) 
+                final = Image.alpha_composite(final, base)
+                
+                draw = ImageDraw.Draw(final)
+                try:
+                    f_nome = ImageFont.truetype("Poppins-Bold.ttf", 60)
+                    f_cargo = ImageFont.truetype("Poppins-Regular.ttf", 34)
+                    
+                    w_n = draw.textbbox((0,0), nome, font=f_nome)[2]
+                    draw.text(((1080 - w_n)/2, 1115), nome, fill="white", font=f_nome)
+                    
+                    w_c = draw.textbbox((0,0), cargo.upper(), font=f_cargo)[2]
+                    draw.text(((1080 - w_c)/2, 1200), cargo.upper(), font=f_cargo, fill="white")
+                except:
+                    st.error("Fontes não encontradas!")
+
+                st.markdown("---")
+                st.image(final, caption="Arte Gerada com Sucesso!", use_container_width=True)
+                
+                buf = io.BytesIO()
+                final.save(buf, format="PNG")
+                st.download_button("📥 Baixar Arte Final", buf.getvalue(), f"niver_{nome}.png", "image/png")
+                
+            except Exception as e:
+                st.error(f"Erro: {e}")
+    else:
+        st.info("⚠️ Preencha todos os campos para gerar.")
