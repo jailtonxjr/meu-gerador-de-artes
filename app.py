@@ -133,7 +133,7 @@ if gerar_arte:
                 # 5. Composição no Template
                 canvas = Image.new("RGBA", base.size, (0,0,0,0))
                 # Coordenadas X, Y para encaixar no buraco do template
-                canvas.paste(foto_final, (20, 270), foto_final) 
+                canvas.paste(foto_final, (20, 275), foto_final) 
                 arte_final = Image.alpha_composite(canvas, base)
                 
                 # 6. Escrever Textos Centralizados
@@ -171,6 +171,7 @@ if gerar_arte:
                 st.error(f"Erro no processamento: {e}")
     else:
         st.warning("⚠️ Preencha todos os campos e selecione uma foto antes de continuar.")
+
 
 
 
